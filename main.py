@@ -16,6 +16,7 @@ host_data = load_host_data(host_file_path)
 # Tkinter uygulaması
 root = tk.Tk()
 root.title("Donanım Bilgileri")
+root.minsize(800, 600)
 
 # Pencere ikonunu ayarlama
 try:
