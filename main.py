@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import Image, ImageTk  # Pillow kütüphanesi için
 from devices import load_device_data
 from host import load_host_data
 from ui import create_ui
@@ -15,6 +16,13 @@ host_data = load_host_data(host_file_path)
 # Tkinter uygulaması
 root = tk.Tk()
 root.title("Donanım Bilgileri")
+
+# Pencere ikonunu ayarlama
+try:
+    icon = ImageTk.PhotoImage(file="assets/pardus.png")
+    root.iconphoto(True, icon)
+except Exception as e:
+    print(f"İkon yüklenirken hata oluştu: {e}")
 
 # Menü çubuğunu oluşturma
 menubar = create_menu(root)
