@@ -4,14 +4,29 @@ from devices import load_device_data
 from host import load_host_data
 from ui import create_ui
 from menu_bar import create_menu
+from hw_probe import getProbe
 
-# Dosya yolları
-device_file_path = '/root/HW_PROBE/LATEST/hw.info/devices.json'
-host_file_path = '/root/HW_PROBE/LATEST/hw.info/host'
+import constants
+import os
+
+#device_file_path = '/root/HW_PROBE/LATEST/hw.info/devices.json'
+#host_file_path = '/root/HW_PROBE/LATEST/hw.info/host'
+
+try:
+    if os.path.exists(constants.DEVICE_FILE_PATH):
+        print("Sistem verisi mevcut. Devam edin yada güncellemek için tıklayın (ui'da düzenlenecek)")
+    else:
+        if os.path.exists("/bin/hw-probe"):
+            getProbe()
+        else:
+            print("HW PROBE yüklü değil. (ui'da gerek yok ?)")
+except Exception as e:
+    print(f"Probe yüklenirken hata oluştu: {e}")
+
 
 # Verileri yükleme
-device_data = load_device_data(device_file_path)
-host_data = load_host_data(host_file_path)
+device_data = load_device_data(constants.DEVICE_FILE_PATH)
+host_data = load_host_data(constants.HOST_FILE_PATH)
 
 # Tkinter uygulaması
 root = tk.Tk()

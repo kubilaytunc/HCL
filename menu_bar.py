@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from pardus_packages import PardusPackagesWindow
+from tkinter import ttk
+import hw_probe
 
 class MenuFunctions:
     def __init__(self, root):
@@ -42,6 +44,60 @@ class MenuFunctions:
                         "   - Hakkında\n" +
                         "   - İçindekiler")
         label.pack(pady=20)
+    
+    def hardware_update(self):
+        # Soruyu açıkça belirtmek için title ve message ekle
+        response = messagebox.askquestion(
+            title="Donanım Güncellemesi", 
+            message="Donanım listeniz mevcut. Listeyi güncellemek ister misiniz?"
+        )
+
+        if response == 'yes':
+            self.perform_update()
+
+
+    def perform_update(self):
+        # Yükleme penceresi oluştur
+        loading_window = tk.Toplevel(self.root)
+        loading_window.title("Yükleniyor")
+        loading_window.geometry("300x100")
+        loading_window.resizable(False, False)
+
+        # Etiket
+        label = tk.Label(loading_window, text="Güncelleme yapılıyor, lütfen bekleyin...", font=("Arial", 10))
+        label.pack(pady=10)
+
+        # İlerleme çubuğu
+        progress = ttk.Progressbar(loading_window, mode="indeterminate")
+        progress.pack(pady=10, padx=20, fill=tk.X)
+        progress.start(1)  # Animasyonu başlat
+
+        # Modal yap
+        loading_window.transient(self.root)
+        loading_window.grab_set()
+
+        self.root.update_idletasks()
+
+        try:
+            hw_probe.getProbe()
+            loading_window.destroy()
+            messagebox.showinfo("Güncelleme", "Güncelleme tamamlandı.")
+        except Exception as e:
+            loading_window.destroy()
+            messagebox.showerror("Hata", f"Güncelleme sırasında bir hata oluştu: {e}")
+
+
+
+
+#    def perform_update(self):
+#        
+#        messagebox.showinfo("Güncelleme", "Donanım güncelleniyor...")
+#
+#        # Call the getProbe() function from hq_probe.py
+#        try:
+#            hw_probe.getProbe()
+#        except Exception as e:
+#            messagebox.showerror("Hata", f"Donanım güncelleme işlemi sırasında hata oluştu: {e}")
 
 def create_menu(root):
     menu_functions = MenuFunctions(root)
@@ -52,6 +108,7 @@ def create_menu(root):
     # Sistem menüsü
     sistem_menu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label="Sistem", menu=sistem_menu)
+    sistem_menu.add_command(label="Donanım Listesi Kontrol", command=menu_functions.hardware_update)
     sistem_menu.add_command(label="Pardus Paketler", command=menu_functions.pardus_paketler)
     sistem_menu.add_command(label="Firmware", command=menu_functions.firmware_bilgisi)
     sistem_menu.add_command(label="Ayrıntılar", command=menu_functions.sistem_ayrintilari)
