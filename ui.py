@@ -80,7 +80,7 @@ def create_ui(root, device_data, host_data):
         driver = value.get("Driver", "N/A")
         status = value.get("Status", "N/A")
         
-        display_status = "Çalışıyor" if status == "works" else "Tespit Edildi" if status == "detected" else status
+        display_status = "Çalışıyor" if status == "works" else "Tespit Edildi" if status == "detected" else "Çalışmıyor" if status == "failed" else status
         row_color = set_row_color(status)
         tree.insert("", "end", values=(id_class, vendor, device, type_, driver, display_status), tags=(row_color,))
 
