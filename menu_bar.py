@@ -1,123 +1,125 @@
-import tkinter as tk
-from tkinter import messagebox
-from pardus_packages import PardusPackagesWindow
-from tkinter import ttk
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QMenuBar, QMenu, QMessageBox, QProgressDialog, QLabel, QVBoxLayout, QWidget
+)
+from PyQt5.QtCore import Qt, QTimer
+from pardus_packages import PardusPackagesWindow  # Bu modülü PyQt5'e uyarlamanız gerekecek
 import hw_probe
+import sys
 
 class MenuFunctions:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, main_window):
+        self.main_window = main_window
 
     def pardus_paketler(self):
         # Pardus paketler penceresini aç
-        PardusPackagesWindow(self.root)
+        self.pardus_packages_window = PardusPackagesWindow(self.main_window)
+        self.pardus_packages_window.show()
 
     def firmware_bilgisi(self):
-        # Firmware bilgilerini gösteren pencere veya işlevsellik
-        messagebox.showinfo("Firmware", "Firmware bilgileri burada gösterilecek")
+        # Firmware bilgilerini göster
+        QMessageBox.information(self.main_window, "Firmware", "Firmware bilgileri burada gösterilecek")
 
     def sistem_ayrintilari(self):
-        # Sistem ayrıntılarını gösteren pencere veya işlevsellik
-        messagebox.showinfo("Sistem Ayrıntıları", "Sistem ayrıntıları burada gösterilecek")
+        # Sistem ayrıntılarını göster
+        QMessageBox.information(self.main_window, "Sistem Ayrıntıları", "Sistem ayrıntıları burada gösterilecek")
 
     def hakkinda(self):
-        # Hakkında bilgilerini gösteren pencere
-        about_window = tk.Toplevel(self.root)
-        about_window.title("Hakkında")
-        about_window.geometry("300x200")
+        # Hakkında penceresi
+        about_window = QWidget()
+        about_window.setWindowTitle("Hakkında")
+        about_window.setGeometry(100, 100, 300, 200)
         
-        label = tk.Label(about_window, text="Donanım Bilgileri Uygulaması\nSürüm 1.0\n\nGeliştiriciler:\nKubilay TUNÇ\nAli Rıza GİRİŞEN\n\n© 2024")
-        label.pack(pady=20)
+        layout = QVBoxLayout()
+        label = QLabel("Donanım Bilgileri Uygulaması\nSürüm 1.0\n\nGeliştiriciler:\nKubilay TUNÇ\nAli Rıza GİRİŞEN\n\n© 2024")
+        layout.addWidget(label)
+        about_window.setLayout(layout)
+        about_window.show()
 
     def icindekiler(self):
-        # İçindekiler/Yardım bilgilerini gösteren pencere
-        help_window = tk.Toplevel(self.root)
-        help_window.title("İçindekiler")
-        help_window.geometry("400x300")
+        # İçindekiler/Yardım penceresi
+        help_window = QWidget()
+        help_window.setWindowTitle("İçindekiler")
+        help_window.setGeometry(100, 100, 400, 300)
         
-        label = tk.Label(help_window, text="Uygulama Kullanım Kılavuzu\n\n" +
-                        "1. Sistem Menüsü\n" +
-                        "   - Pardus Paketler\n" +
-                        "   - Firmware\n" +
-                        "   - Ayrıntılar\n\n" +
-                        "2. Yardım Menüsü\n" +
-                        "   - Hakkında\n" +
-                        "   - İçindekiler")
-        label.pack(pady=20)
-    
+        layout = QVBoxLayout()
+        label = QLabel(
+            "Uygulama Kullanım Kılavuzu\n\n"
+            "1. Sistem Menüsü\n"
+            "   - Pardus Paketler\n"
+            "   - Firmware\n"
+            "   - Ayrıntılar\n\n"
+            "2. Yardım Menüsü\n"
+            "   - Hakkında\n"
+            "   - İçindekiler"
+        )
+        layout.addWidget(label)
+        help_window.setLayout(layout)
+        help_window.show()
+
     def hardware_update(self):
-        # Soruyu açıkça belirtmek için title ve message ekle
-        response = messagebox.askquestion(
-            title="Donanım Güncellemesi", 
-            message="Donanım listeniz mevcut. Listeyi güncellemek ister misiniz?"
+        # Donanım güncelleme sorusu
+        response = QMessageBox.question(
+            self.main_window,
+            "Donanım Güncellemesi",
+            "Donanım listeniz mevcut. Listeyi güncellemek ister misiniz?",
+            QMessageBox.Yes | QMessageBox.No
         )
 
-        if response == 'yes':
+        if response == QMessageBox.Yes:
             self.perform_update()
 
-
     def perform_update(self):
-        # Yükleme penceresi oluştur
-        loading_window = tk.Toplevel(self.root)
-        loading_window.title("Yükleniyor")
-        loading_window.geometry("300x100")
-        loading_window.resizable(False, False)
+        # Yükleme penceresi
+        self.progress_dialog = QProgressDialog("Güncelleme yapılıyor, lütfen bekleyin...", None, 0, 0, self.main_window)
+        self.progress_dialog.setWindowTitle("Yükleniyor")
+        self.progress_dialog.setWindowModality(Qt.WindowModal)
+        self.progress_dialog.setCancelButton(None)  # İptal butonunu devre dışı bırak
+        self.progress_dialog.show()
 
-        # Etiket
-        label = tk.Label(loading_window, text="Güncelleme yapılıyor, lütfen bekleyin...", font=("Arial", 10))
-        label.pack(pady=10)
+        # İşlemi başlat
+        QTimer.singleShot(100, self.run_update)  # İşlemi biraz geciktir
 
-        # İlerleme çubuğu
-        progress = ttk.Progressbar(loading_window, mode="indeterminate")
-        progress.pack(pady=10, padx=20, fill=tk.X)
-        progress.start(1)  # Animasyonu başlat
-
-        # Modal yap
-        loading_window.transient(self.root)
-        loading_window.grab_set()
-
-        self.root.update_idletasks()
-
+    def run_update(self):
         try:
             hw_probe.getProbe()
-            loading_window.destroy()
-            messagebox.showinfo("Güncelleme", "Güncelleme tamamlandı.")
+            self.progress_dialog.close()
+            QMessageBox.information(self.main_window, "Güncelleme", "Güncelleme tamamlandı.")
         except Exception as e:
-            loading_window.destroy()
-            messagebox.showerror("Hata", f"Güncelleme sırasında bir hata oluştu: {e}")
+            self.progress_dialog.close()
+            QMessageBox.critical(self.main_window, "Hata", f"Güncelleme sırasında bir hata oluştu: {e}")
 
 
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Pardus Donanım Kontrol")
+        self.setGeometry(100, 100, 800, 600)
+
+        # Menü fonksiyonlarını başlat
+        self.menu_functions = MenuFunctions(self)
+
+        # Menü çubuğunu oluştur
+        self.create_menu()
+
+    def create_menu(self):
+        menubar = self.menuBar()
+
+        # Sistem menüsü
+        sistem_menu = menubar.addMenu("Sistem")
+        sistem_menu.addAction("Donanım Listesi Kontrol", self.menu_functions.hardware_update)
+        sistem_menu.addAction("Pardus Paketler", self.menu_functions.pardus_paketler)
+        sistem_menu.addAction("Firmware", self.menu_functions.firmware_bilgisi)
+        sistem_menu.addAction("Ayrıntılar", self.menu_functions.sistem_ayrintilari)
+        sistem_menu.addAction("Çıkış", self.close)
+
+        # Yardım menüsü
+        yardim_menu = menubar.addMenu("Yardım")
+        yardim_menu.addAction("Hakkında", self.menu_functions.hakkinda)
+        yardim_menu.addAction("İçindekiler", self.menu_functions.icindekiler)
 
 
-#    def perform_update(self):
-#        
-#        messagebox.showinfo("Güncelleme", "Donanım güncelleniyor...")
-#
-#        # Call the getProbe() function from hq_probe.py
-#        try:
-#            hw_probe.getProbe()
-#        except Exception as e:
-#            messagebox.showerror("Hata", f"Donanım güncelleme işlemi sırasında hata oluştu: {e}")
-
-def create_menu(root):
-    menu_functions = MenuFunctions(root)
-    
-    menubar = tk.Menu(root)
-    root.config(menu=menubar)
-
-    # Sistem menüsü
-    sistem_menu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Sistem", menu=sistem_menu)
-    sistem_menu.add_command(label="Donanım Listesi Kontrol", command=menu_functions.hardware_update)
-    sistem_menu.add_command(label="Pardus Paketler", command=menu_functions.pardus_paketler)
-    sistem_menu.add_command(label="Firmware", command=menu_functions.firmware_bilgisi)
-    sistem_menu.add_command(label="Ayrıntılar", command=menu_functions.sistem_ayrintilari)
-    sistem_menu.add_command(label="Çıkış", command=root.quit)
-
-    # Yardım menüsü
-    yardim_menu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Yardım", menu=yardim_menu)
-    yardim_menu.add_command(label="Hakkında", command=menu_functions.hakkinda)
-    yardim_menu.add_command(label="İçindekiler", command=menu_functions.icindekiler)
-
-    return menubar 
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())

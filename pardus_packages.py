@@ -1,51 +1,61 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+from PyQt5.QtWidgets import (
+    QDialog, QVBoxLayout, QPushButton, QMessageBox, QApplication
+)
+from PyQt5.QtCore import Qt
 
-class PardusPackagesWindow:
-    def __init__(self, parent):
-        self.window = tk.Toplevel(parent)
-        self.window.title("Pardus Paketler")
-        
-        # Pencereyi ortalama
-        window_width = 400
-        window_height = 500
-        screen_width = self.window.winfo_screenwidth()
-        screen_height = self.window.winfo_screenheight()
-        center_x = int(screen_width/2 - window_width/2)
-        center_y = int(screen_height/2 - window_height/2)
-        self.window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-        
-        # Ana container frame
-        main_frame = ttk.Frame(self.window, padding="20")
-        main_frame.pack(fill=tk.BOTH, expand=True)
-        
+class PardusPackagesWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Pardus Paketler")
+        self.setFixedSize(400, 500)  # Pencere boyutunu sabitle
+
+        # Ana layout
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)  # Butonları ortala
+
         # Butonlar
-        ttk.Button(main_frame, text="Güncellenebilirlik", command=self.check_updates).pack(fill=tk.X, pady=5)
-        ttk.Button(main_frame, text="Backports Depolar", command=self.backports_repos).pack(fill=tk.X, pady=5)
-        ttk.Button(main_frame, text="Debian Firmware Paketleri", command=self.debian_firmware).pack(fill=tk.X, pady=5)
-        ttk.Button(main_frame, text="Kernel Seçenekleri", command=self.kernel_options).pack(fill=tk.X, pady=5)
-        ttk.Button(main_frame, text="Çıkış", command=self.window.destroy).pack(fill=tk.X, pady=20)
+        buttons = [
+            ("Güncellenebilirlik", self.check_updates),
+            ("Backports Depolar", self.backports_repos),
+            ("Debian Firmware Paketleri", self.debian_firmware),
+            ("Kernel Seçenekleri", self.kernel_options),
+            ("Çıkış", self.close)
+        ]
+
+        for text, slot in buttons:
+            button = QPushButton(text)
+            button.clicked.connect(slot)
+            layout.addWidget(button)
 
     def check_updates(self):
         # Güncellenebilir paketleri kontrol et
-        messagebox.showinfo("Güncellemeler", 
-                          "Sistem güncellemeleri kontrol ediliyor...\n"
-                          "Bu özellik henüz geliştirme aşamasındadır.")
+        QMessageBox.information(self, "Güncellemeler",
+                              "Sistem güncellemeleri kontrol ediliyor...\n"
+                              "Bu özellik henüz geliştirme aşamasındadır.")
 
     def backports_repos(self):
         # Backports depolarını göster/yönet
-        messagebox.showinfo("Backports Depolar", 
-                          "Backports depo yönetimi...\n"
-                          "Bu özellik henüz geliştirme aşamasındadır.")
+        QMessageBox.information(self, "Backports Depolar",
+                              "Backports depo yönetimi...\n"
+                              "Bu özellik henüz geliştirme aşamasındadır.")
 
     def debian_firmware(self):
         # Debian firmware paketlerini listele
-        messagebox.showinfo("Debian Firmware", 
-                          "Debian firmware paketleri listeleniyor...\n"
-                          "Bu özellik henüz geliştirme aşamasındadır.")
+        QMessageBox.information(self, "Debian Firmware",
+                              "Debian firmware paketleri listeleniyor...\n"
+                              "Bu özellik henüz geliştirme aşamasındadır.")
 
     def kernel_options(self):
         # Kernel seçeneklerini göster
-        messagebox.showinfo("Kernel Seçenekleri", 
-                          "Kernel seçenekleri görüntüleniyor...\n"
-                          "Bu özellik henüz geliştirme aşamasındadır.") 
+        QMessageBox.information(self, "Kernel Seçenekleri",
+                              "Kernel seçenekleri görüntüleniyor...\n"
+                              "Bu özellik henüz geliştirme aşamasındadır.")
+
+
+# Örnek kullanım
+if __name__ == "__main__":
+    import sys
+    app = QApplication(sys.argv)
+    window = PardusPackagesWindow()
+    window.show()
+    sys.exit(app.exec_())
