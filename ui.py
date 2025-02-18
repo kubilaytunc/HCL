@@ -1,9 +1,14 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QScrollArea, QSplitter, QMenuBar, QMenu, QAction
+    QHeaderView, QScrollArea, QSplitter, QMenuBar, QMenu, QAction, QMessageBox, QLabel
 )
 from PyQt5.QtGui import QPixmap, QColor, QFont 
 from PyQt5.QtCore import Qt
+import os 
+from hw_probe import getProbe
+import constants
+from devices import load_device_data
+from host import load_host_data
 
 def set_row_color(status):
     """Satır rengi belirleme."""
@@ -14,6 +19,19 @@ def set_row_color(status):
     else:
         return QColor("#F2A1A1")  # Kırmızı
 
+def open_device_check():
+        if os.path.exists("/bin/hw-probe"):
+            print("hw-probe var. Veriyi almak için çalıştırıyorum...")
+            try:
+                getProbe()  # Buradaki getProbe fonksiyonu bir hata oluşturabilir
+            except Exception as e:
+                print(f"Probe verisi alınırken hata oluştu: {e}")
+        else:
+            print("HW PROBE yüklü değil.")
+        # Verileri yükleme
+        device_data = load_device_data(constants.DEVICE_FILE_PATH)
+        host_data = load_host_data(constants.HOST_FILE_PATH)
+        
 def create_ui(device_data, host_data):
     """PyQt5 arayüzünü oluşturur."""
     window = QMainWindow()
@@ -25,33 +43,50 @@ def create_ui(device_data, host_data):
 
     # Dosya menüsü
     file_menu = menubar.addMenu('Sistem')
+    def confirm_update():
+        """Onay kutusunu aç ve kullanıcının seçimine göre pencereyi güncelle"""
+        msg_box = QMessageBox(window)
+        msg_box.setWindowTitle("Güncelleme")
+        msg_box.setText("Donanım listesini güncellemek istiyor musunuz?")
 
-    # Yeni dosya eylemi
-    new_action = QAction('Donanım Listesi Kontrol', window)
-    file_menu.addAction(new_action)
+        evet_button = msg_box.addButton("Evet", QMessageBox.YesRole)
+        hayir_button = msg_box.addButton("Hayır", QMessageBox.NoRole)
 
-    # Aç eylemi
-    open_action = QAction('Pardus Paketler', window)
+        msg_box.exec_()
+
+        if msg_box.clickedButton() == evet_button:
+            open_device_check()
+            print("Güncelleme yapılıyor...")
+        else:
+            print("Güncelleme iptal edildi.")
+
+    
+    update_action = QAction('Donanım Listesi Güncelle', window)
+    update_action.triggered.connect(confirm_update)
+    file_menu.addAction(update_action)
+
+    
+    '''open_action = QAction('Pardus Paketler', window)
     file_menu.addAction(open_action)
 
-    # Kaydet eylemi
-    save_action = QAction('Firmware', window)
-    file_menu.addAction(save_action)
+    
+    backports_action = QAction('Çekirdek ve Backports Depolar', window)
+    file_menu.addAction(backports_action)
 
     save_action = QAction('Ayrıntılar', window)
-    file_menu.addAction(save_action)
+    file_menu.addAction(save_action)'''
 
     # Çıkış eylemi
     exit_action = QAction('Çıkış', window)
     exit_action.triggered.connect(window.close)
     file_menu.addAction(exit_action)
 
-    # Yardım menüsü
+    '''# Yardım menüsü
     help_menu = menubar.addMenu('Yardım')
 
     # Hakkında eylemi
     about_action = QAction('Hakkında', window)
-    help_menu.addAction(about_action)
+    help_menu.addAction(about_action)'''
 
     # Ana container widget
     main_widget = QWidget()

@@ -16,9 +16,9 @@ class PardusPackagesWindow(QDialog):
         # Butonlar
         buttons = [
             ("Güncellenebilirlik", self.check_updates),
-            ("Backports Depolar", self.backports_repos),
-            ("Debian Firmware Paketleri", self.debian_firmware),
-            ("Kernel Seçenekleri", self.kernel_options),
+            #("Backports Depolar", self.backports_repos),
+            #("Debian Firmware Paketleri", self.debian_firmware),
+            #("Kernel Seçenekleri ve Backports Depolar", self.kernel_options),
             ("Çıkış", self.close)
         ]
 
@@ -46,10 +46,8 @@ class PardusPackagesWindow(QDialog):
                               "Bu özellik henüz geliştirme aşamasındadır.")
 
     def kernel_options(self):
-        # Kernel seçeneklerini göster
-        QMessageBox.information(self, "Kernel Seçenekleri",
-                              "Kernel seçenekleri görüntüleniyor...\n"
-                              "Bu özellik henüz geliştirme aşamasındadır.")
+        self.kernel_test_window = KernelApp()  # Yeni pencere aç
+        self.kernel_test_window.show()
 
 
 # Örnek kullanım

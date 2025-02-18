@@ -9,6 +9,9 @@ from devices import load_device_data
 from host import load_host_data
 import constants
 from hw_probe import getProbe
+from pardus_packages import PardusPackagesWindow
+from pardus_kernel import KernelApp
+
 
 class LandingPage(QMainWindow):
     def __init__(self):
@@ -27,7 +30,7 @@ class LandingPage(QMainWindow):
         buttons = [
             ("Donanım Listesi Kontrol", self.open_device_check),
             ("Pardus Paketler", self.open_pardus_packages),
-            ("Firmware", self.open_firmware),
+            ("Çekirdek ve Backports Depolar", self.open_backports),
             ("Ayrıntılar", self.show_details),
             ("Çıkış", self.close)
         ]
@@ -111,11 +114,13 @@ class LandingPage(QMainWindow):
         
     def open_pardus_packages(self):
         print("Pardus Paketler açılıyor...")
-        QMessageBox.information(self, "Pardus Paketler", "Geliştirme aşamasındadır...")
+        self.packages_window = PardusPackagesWindow()  # Yeni pencere aç
+        self.packages_window.show()
     
-    def open_firmware(self):
-        print("Firmware açılıyor...")
-        QMessageBox.information(self, "Firmware", "Geliştirme aşamasındadır...")
+    def open_backports(self):
+        self.kernel_test_window = KernelApp()  # Yeni pencere aç
+        self.kernel_test_window.show()
+        print("Kernel backports açılıyor...")
 
     
     def show_details(self):
