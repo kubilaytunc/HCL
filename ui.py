@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-    QHeaderView, QScrollArea, QSplitter, QMenuBar, QMenu, QAction, QMessageBox, QLabel
+    QHeaderView, QScrollArea, QSplitter, QMenuBar, QMenu, QAction, QMessageBox, QProgressDialog
 )
 from PyQt5.QtGui import QPixmap, QColor, QFont 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 import os 
 from hw_probe import getProbe
 import constants
@@ -20,18 +20,19 @@ def set_row_color(status):
         return QColor("#F2A1A1")  # Kırmızı
 
 def open_device_check():
-        if os.path.exists("/bin/hw-probe"):
-            print("hw-probe var. Veriyi almak için çalıştırıyorum...")
-            try:
-                getProbe()  # Buradaki getProbe fonksiyonu bir hata oluşturabilir
-            except Exception as e:
-                print(f"Probe verisi alınırken hata oluştu: {e}")
-        else:
-            print("HW PROBE yüklü değil.")
-        # Verileri yükleme
-        device_data = load_device_data(constants.DEVICE_FILE_PATH)
-        host_data = load_host_data(constants.HOST_FILE_PATH)
-        
+    if os.path.exists("/bin/hw-probe"):
+        print("hw-probe var. Veriyi almak için çalıştırıyorum...")
+        try:
+            getProbe()  # Buradaki getProbe fonksiyonu bir hata oluşturabilir
+        except Exception as e:
+            print(f"Probe verisi alınırken hata oluştu: {e}")
+    else:
+        print("HW PROBE yüklü değil.")
+    # Verileri yükleme
+    device_data = load_device_data(constants.DEVICE_FILE_PATH)
+    host_data = load_host_data(constants.HOST_FILE_PATH)
+    return device_data, host_data
+
 def create_ui(device_data, host_data):
     """PyQt5 arayüzünü oluşturur."""
     window = QMainWindow()
@@ -43,6 +44,7 @@ def create_ui(device_data, host_data):
 
     # Dosya menüsü
     file_menu = menubar.addMenu('Sistem')
+
     def confirm_update():
         """Onay kutusunu aç ve kullanıcının seçimine göre pencereyi güncelle"""
         msg_box = QMessageBox(window)
@@ -55,38 +57,38 @@ def create_ui(device_data, host_data):
         msg_box.exec_()
 
         if msg_box.clickedButton() == evet_button:
-            open_device_check()
-            print("Güncelleme yapılıyor...")
+            # Güncelleme işlemi sırasında loading göstergesi göster
+            progress = QProgressDialog("Güncelleme yapılıyor...", "İptal", 0, 0, window)
+            progress.setWindowTitle("Güncelleme")
+            progress.setWindowModality(Qt.WindowModal)
+            progress.show()
+
+            # Güncelleme işlemini başlat
+            QTimer.singleShot(2000, lambda: perform_update(progress))  # 2 saniye sonra güncelleme işlemini başlat
         else:
             print("Güncelleme iptal edildi.")
 
-    
+    def perform_update(progress):
+        """Güncelleme işlemini gerçekleştir ve pencereyi yenile."""
+        device_data, host_data = open_device_check()
+        progress.close()
+
+        # Güncelleme tamamlandı mesajı göster
+        QMessageBox.information(window, "Güncelleme Tamamlandı", "Donanım listesi başarıyla güncellendi.")
+
+        # Pencereyi yenile
+        window.close()
+        new_window = create_ui(device_data, host_data)
+        new_window.show()
+
     update_action = QAction('Donanım Listesi Güncelle', window)
     update_action.triggered.connect(confirm_update)
     file_menu.addAction(update_action)
-
-    
-    '''open_action = QAction('Pardus Paketler', window)
-    file_menu.addAction(open_action)
-
-    
-    backports_action = QAction('Çekirdek ve Backports Depolar', window)
-    file_menu.addAction(backports_action)
-
-    save_action = QAction('Ayrıntılar', window)
-    file_menu.addAction(save_action)'''
 
     # Çıkış eylemi
     exit_action = QAction('Çıkış', window)
     exit_action.triggered.connect(window.close)
     file_menu.addAction(exit_action)
-
-    '''# Yardım menüsü
-    help_menu = menubar.addMenu('Yardım')
-
-    # Hakkında eylemi
-    about_action = QAction('Hakkında', window)
-    help_menu.addAction(about_action)'''
 
     # Ana container widget
     main_widget = QWidget()
