@@ -11,6 +11,7 @@ import constants
 from hw_probe import getProbe
 from pardus_packages import PardusPackagesWindow
 from pardus_kernel import KernelApp
+from domain_joiner import DomainJoinerWindow
 
 
 class LandingPage(QMainWindow):
@@ -31,6 +32,7 @@ class LandingPage(QMainWindow):
             ("Donanım Listesi Kontrol", self.open_device_check),
             ("Pardus Paketler", self.open_pardus_packages),
             ("Çekirdek ve Backports Depolar", self.open_backports),
+            ("Pardus'u Domaine Al",self.domain_joiner),
             ("Ayrıntılar", self.show_details),
             ("Çıkış", self.close)
         ]
@@ -126,6 +128,10 @@ class LandingPage(QMainWindow):
     def show_details(self):
         QMessageBox.information(self, "Ayrıntılar", "\nSürüm 1.0\n\nGeliştiriciler:\nKubilay TUNÇ\nAli Rıza GİRİŞEN\n\n© 2024")
 
+    def domain_joiner(self):
+        print("Domain Joiner Açılıyor...")
+        self.domain_joiner_window = DomainJoinerWindow()
+        self.domain_joiner_window.show()
 
 # PyQt5 uygulaması
 app = QApplication(sys.argv)
