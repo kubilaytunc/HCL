@@ -1,7 +1,10 @@
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QPushButton, QMessageBox, QApplication
+    QApplication, QApplication, QWidget, QMessageBox, QVBoxLayout, QLabel, QLineEdit, QPushButton, QDialog
 )
 from PyQt5.QtCore import Qt
+import sys
+import subprocess
+from sssd_functions import sssd_join
 
 class DomainJoinerWindow(QDialog):
     def __init__(self, parent=None):
@@ -31,6 +34,8 @@ class DomainJoinerWindow(QDialog):
                               "AD veya Samba üzerinde yetkili bir kullanıcı\n"
                                 "Yetkili kullanıcı parolası\n"
                               "AD veya Samba DC ip adresi.")
+        sssd_join()
+        
 
     def winbind_join(self):
         # Winbind ile yapılacak işlemler
