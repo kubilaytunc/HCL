@@ -1,53 +1,58 @@
 from PyQt5.QtWidgets import (
-    QApplication, QApplication, QWidget, QMessageBox, QVBoxLayout, QLabel, QLineEdit, QPushButton, QDialog
+    QApplication, QWidget, QMessageBox, QVBoxLayout, QPushButton, QDialog
 )
 from PyQt5.QtCore import Qt
 import sys
-import subprocess
-from sssd_functions import sssd_join
+from sssd_join import SSSDJoinUI  # Yeni pencere açmadan bu sınıfı kullanacağız
 
 class DomainJoinerWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Pardus Domaine Al")
-        self.setFixedSize(400, 500)  # Pencere boyutunu sabitle
+        self.setFixedSize(400, 500)
 
-        # Ana layout
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignCenter)  # Butonları ortala
+        self.layout = QVBoxLayout(self)
+        self.layout.setAlignment(Qt.AlignCenter)
 
-        # Butonlar
-        buttons = [
-            ("SSSD", self.sssd_join),
-            ("WINBIND", self.winbind_join),
-            ("Çıkış", self.close)
-        ]
+        self.sssd_button = QPushButton("SSSD")
+        self.sssd_button.clicked.connect(self.sssd_join)
 
-        for text, slot in buttons:
-            button = QPushButton(text)
-            button.clicked.connect(slot)
-            layout.addWidget(button)
+        self.winbind_button = QPushButton("WINBIND")
+        self.winbind_button.clicked.connect(self.winbind_join)
+
+        self.exit_button = QPushButton("Çıkış")
+        self.exit_button.clicked.connect(self.close)
+
+        self.layout.addWidget(self.sssd_button)
+        self.layout.addWidget(self.winbind_button)
+        self.layout.addWidget(self.exit_button)
+
+        # Varsayılan görünüm
+        self.current_widget = None
 
     def sssd_join(self):
-        # SSSD ile yapılacak işlemler
+        """SSSDJoinUI'yi mevcut pencerenin içinde göster."""
         QMessageBox.information(self, "SSSD için gerekli bilgiler",
-                              "AD veya Samba üzerinde yetkili bir kullanıcı\n"
+                                "AD veya Samba üzerinde yetkili bir kullanıcı\n"
                                 "Yetkili kullanıcı parolası\n"
-                              "AD veya Samba DC ip adresi.")
-        sssd_join()
-        
+                                "AD veya Samba DC ip adresi.")
+
+        if self.current_widget:
+            self.layout.removeWidget(self.current_widget)
+            self.current_widget.deleteLater()
+
+        self.current_widget = SSSDJoinUI()  # Yeni pencere yerine burada göster
+        self.layout.addWidget(self.current_widget)
 
     def winbind_join(self):
-        # Winbind ile yapılacak işlemler
+        """Winbind için bilgi mesajı gösterir."""
         QMessageBox.information(self, "Winbind için gerekli bilgiler",
-                              "AD veya Samba üzerinde yetkili bir kullanıcı\n"
-                                 "Yetkili kullanıcı parolası\n"
-                              "AD veya Samba DC ip adresi.")
+                                "AD veya Samba üzerinde yetkili bir kullanıcı\n"
+                                "Yetkili kullanıcı parolası\n"
+                                "AD veya Samba DC ip adresi.")
 
 
-# Örnek kullanım
 if __name__ == "__main__":
-    import sys
     app = QApplication(sys.argv)
     window = DomainJoinerWindow()
     window.show()
