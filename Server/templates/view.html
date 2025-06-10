@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}JSON: {{ json_id }}{% endblock %}
+
+{% block content %}
+<h2>JSON ID: {{ json_id }}</h2>
+
+{% if data is mapping %}
+    <table class="table table-bordered table-striped">
+        <thead><tr><th>Anahtar</th><th>Değer</th></tr></thead>
+        <tbody>
+        {% for key, value in data.items() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>
+                    {% if value is mapping or value is iterable and not value is string %}
+                        <pre>{{ value | tojson(indent=2) }}</pre>
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <pre>{{ data | tojson(indent=4) }}</pre>
+{% endif %}
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary">Yeni JSON Yükle</a>
+{% endblock %}

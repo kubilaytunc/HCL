@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}JSON Listesi{% endblock %}
+
+{% block content %}
+<h1>JSON Listesi</h1>
+
+<form method="get" action="{{ url_for('list_jsons') }}" class="mb-3">
+    <input type="text" name="q" value="{{ query }}" placeholder="Ara..." class="form-control" />
+</form>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Başlık (İlk Anahtar)</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in results %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ extract_title(item.content) }}</td>
+            <td><a href="{{ url_for('view_json', json_id=item.id) }}" class="btn btn-sm btn-primary">Görüntüle</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="text-center">Kayıt bulunamadı.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav aria-label="Sayfalama">
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('list_jsons', page=pagination.prev_num, q=query) }}">Önceki</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Önceki</span></li>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+                {% if p == pagination.page %}
+                    <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('list_jsons', page=p, q=query) }}">{{ p }}</a>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('list_jsons', page=pagination.next_num, q=query) }}">Sonraki</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Sonraki</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary">Yeni JSON Yükle</a>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<h1>JSON Dosyası Yükle</h1>
+<form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <input type="file" name="json_file" accept=".json" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Yükle</button>
+</form>
+<a href="{{ url_for('list_jsons') }}" class="btn btn-link mt-3">Kayıtlı JSON'ları Listele</a>
+{% endblock %}
